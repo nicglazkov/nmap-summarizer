@@ -10,7 +10,9 @@
     "deploy": "npm run build && firebase deploy"
   },
   "dependencies": {
-    "lit": "^3.1.0"
+    "@google/generative-ai": "^0.1.3",
+    "lit": "^3.1.0",
+    "lit-markdown": "^1.3.2"
   },
   "devDependencies": {
     "prettier": "3.1.1",
