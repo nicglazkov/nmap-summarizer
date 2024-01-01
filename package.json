@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "firebase deploy"
+    "deploy": "npm run build && firebase deploy"
   },
   "dependencies": {
     "lit": "^3.1.0"
