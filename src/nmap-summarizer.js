@@ -67,18 +67,26 @@ export class NmapSummarizer extends LitElement {
   static get properties() {
     return {
       results: { type: String },
+      geminiKey: { type: String },
     };
   }
 
   constructor() {
     super();
     this.results = "Click Summarize to view results (may take a few moments)";
+    this.geminiKey = localStorage.getItem("GEMINI_KEY");
   }
 
   render() {
     return html`<section>
         <h1>Nmap Summarizer</h1>
-        <div><input placeholder="Paste Gemini API Key here" /></div>
+        <div>
+          <input
+            type="password"
+            placeholder="Paste Gemini API Key here"
+            value=${this.geminiKey}
+          />
+        </div>
         <div>
           <textarea
             placeholder="Paste Nmap output here (use nmap -sC -sV -oA)"
@@ -93,6 +101,7 @@ export class NmapSummarizer extends LitElement {
   }
   async #onClick() {
     const geminiKey = this.shadowRoot.querySelector(`input`).value;
+    localStorage.setItem("GEMINI_KEY", geminiKey);
     const nmapInput = this.shadowRoot.querySelector(`textarea`).value;
     console.log("Clicked!");
     console.log(geminiKey);
