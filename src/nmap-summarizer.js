@@ -5,6 +5,11 @@ import {
   HarmBlockThreshold,
 } from "@google/generative-ai";
 import { resolveMarkdown } from "lit-markdown";
+import "@shoelace-style/shoelace/dist/components/button/button.js";
+import "@shoelace-style/shoelace/dist/components/icon/icon.js";
+import "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
+import "@shoelace-style/shoelace/dist/components/textarea/textarea.js";
+import "@shoelace-style/shoelace/dist/components/input/input.js";
 
 const MODEL_NAME = "gemini-pro";
 
@@ -68,6 +73,7 @@ export class NmapSummarizer extends LitElement {
     return {
       results: { type: String },
       geminiKey: { type: String },
+      loading: { type: Boolean },
     };
   }
 
@@ -75,24 +81,33 @@ export class NmapSummarizer extends LitElement {
     super();
     this.results = "Click Summarize to view results (may take a few moments)";
     this.geminiKey = localStorage.getItem("GEMINI_KEY");
+    this.loading = false;
   }
 
   render() {
     return html`<section>
         <h1>Nmap Summarizer</h1>
         <div>
-          <input
+          <sl-input
             type="password"
             placeholder="Paste Gemini API Key here"
             value=${this.geminiKey}
-          />
+          ></sl-input>
         </div>
         <div>
-          <textarea
+          <sl-textarea
             placeholder="Paste Nmap output here (use nmap -sC -sV -oA)"
-          ></textarea>
+            rows="12"
+          ></sl-textarea>
         </div>
-        <div><button @click=${this.#onClick}>Summarize!</button></div>
+        <div>
+          <sl-button
+            ?loading=${this.loading}
+            ?disabled=${this.loading}
+            @click=${this.#onClick}
+            >Summarize!</sl-button
+          >
+        </div>
       </section>
       <section>
         <h1>Results</h1>
@@ -100,19 +115,31 @@ export class NmapSummarizer extends LitElement {
       </section>`;
   }
   async #onClick() {
-    const geminiKey = this.shadowRoot.querySelector(`input`).value;
+    const geminiKey = this.shadowRoot.querySelector(`sl-input`).value;
     localStorage.setItem("GEMINI_KEY", geminiKey);
-    const nmapInput = this.shadowRoot.querySelector(`textarea`).value;
-    console.log("Clicked!");
+    const nmapInput = this.shadowRoot.querySelector(`sl-textarea`).value;
     console.log(geminiKey);
+    console.log("Clicked!");
     console.log(nmapInput);
+    this.loading = true;
     this.results = await run(geminiKey, nmapInput);
+    this.loading = false;
   }
   static get styles() {
     return css`
+      section {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+      div {
+        padding-bottom: 10px;
+      }
       :host {
         display: flex;
+        flex: 1;
       }
+
       button {
         padding: 10px;
       }
