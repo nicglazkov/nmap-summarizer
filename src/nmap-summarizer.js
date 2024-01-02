@@ -10,6 +10,10 @@ import "@shoelace-style/shoelace/dist/components/icon/icon.js";
 import "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import "@shoelace-style/shoelace/dist/components/textarea/textarea.js";
 import "@shoelace-style/shoelace/dist/components/input/input.js";
+import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js";
+
+import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js";
+setBasePath("/public/");
 
 const MODEL_NAME = "gemini-pro";
 
@@ -85,33 +89,44 @@ export class NmapSummarizer extends LitElement {
   }
 
   render() {
-    return html`<section>
-        <h1>Nmap Summarizer</h1>
-        <div>
-          <sl-input
-            type="password"
-            placeholder="Paste Gemini API Key here"
-            value=${this.geminiKey}
-          ></sl-input>
-        </div>
-        <div>
-          <sl-textarea
-            placeholder="Paste Nmap output here (use nmap -sC -sV -oA)"
-            rows="12"
-          ></sl-textarea>
-        </div>
-        <div>
-          <sl-button
-            ?loading=${this.loading}
-            ?disabled=${this.loading}
-            @click=${this.#onClick}
-            >Summarize!</sl-button
-          >
-        </div>
-      </section>
-      <section>
-        <h1>Results</h1>
-        <div>${resolveMarkdown(this.results)}</div>
+    return html` <div id="github">
+        <sl-icon-button
+          name="Github"
+          label="View code on Github"
+          href="https://github.com/nicglazkov/nmap-summarizer"
+          target="_blank"
+        ></sl-icon-button>
+      </div>
+
+      <section class="panel">
+        <section>
+          <h1>Nmap Summarizer</h1>
+          <div>
+            <sl-input
+              type="password"
+              placeholder="Paste Gemini API Key here"
+              value=${this.geminiKey}
+            ></sl-input>
+          </div>
+          <div>
+            <sl-textarea
+              placeholder="Paste Nmap output here (use nmap -sC -sV -oA)"
+              rows="12"
+            ></sl-textarea>
+          </div>
+          <div>
+            <sl-button
+              ?loading=${this.loading}
+              ?disabled=${this.loading}
+              @click=${this.#onClick}
+              >Summarize!</sl-button
+            >
+          </div>
+        </section>
+        <section>
+          <h1>Results</h1>
+          <div>${resolveMarkdown(this.results)}</div>
+        </section>
       </section>`;
   }
   async #onClick() {
@@ -127,9 +142,9 @@ export class NmapSummarizer extends LitElement {
   }
   static get styles() {
     return css`
-      section {
+      section.panel {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         flex: 1;
       }
       div {
@@ -137,7 +152,14 @@ export class NmapSummarizer extends LitElement {
       }
       :host {
         display: flex;
+        flex-direction: column;
         flex: 1;
+      }
+      #github {
+        display: flex;
+        justify-content: right;
+        font-size: 32px;
+        padding-bottom: 0;
       }
 
       button {
@@ -145,6 +167,7 @@ export class NmapSummarizer extends LitElement {
       }
       section {
         padding-left: 10px;
+        flex: 1;
       }
       input {
         width: 400px;
