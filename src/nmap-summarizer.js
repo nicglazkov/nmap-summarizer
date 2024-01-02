@@ -1,3 +1,6 @@
+import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js";
+setBasePath("/");
+
 import { LitElement, html, css } from "lit";
 import {
   GoogleGenerativeAI,
@@ -11,9 +14,6 @@ import "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
 import "@shoelace-style/shoelace/dist/components/textarea/textarea.js";
 import "@shoelace-style/shoelace/dist/components/input/input.js";
 import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js";
-
-import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js";
-setBasePath("/public/");
 
 const MODEL_NAME = "gemini-pro";
 
@@ -91,7 +91,7 @@ export class NmapSummarizer extends LitElement {
   render() {
     return html` <div id="github">
         <sl-icon-button
-          name="Github"
+          name="github"
           label="View code on Github"
           href="https://github.com/nicglazkov/nmap-summarizer"
           target="_blank"
