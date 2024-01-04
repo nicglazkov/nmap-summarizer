@@ -15,9 +15,39 @@ import "@shoelace-style/shoelace/dist/components/textarea/textarea.js";
 import "@shoelace-style/shoelace/dist/components/input/input.js";
 import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js";
 
+import "graphviz-webcomponent/bundled";
+
+const stripCodeBlock = (code) =>
+  code.replace(/(?:```(?:graphviz)?\n+)(.*)(?:\n+```)/gms, "$1");
+
 const MODEL_NAME = "gemini-pro";
 
-async function run(apiKey, nmapInput) {
+const markdownInput = (nmapInput) => [
+  {
+    text: `Given the NMAP OUTPUT below, summarize it in the following format.
+    The output must be valid markdown:
+    
+      summary: a non-technical summary in a couple of sentences
+      details: step-by-step comprehensive explanation that an expert can quickly scan and understand
+      tools: give suggestions for some networking or cybersecurity tools that can be used to better understand the Nmap results
+    
+      NMAP OUTPUT:
+      ${nmapInput}
+      RESPONSE:`,
+  },
+];
+
+const graphvizInput = (nmapInput) => [
+  {
+    text: `Given the NMAP OUTPUT below, create color coded graphviz code with open and closed ports, identified and unidentified software, and full network topology.
+
+      NMAP OUTPUT:
+      ${nmapInput}
+      RESPONSE:`,
+  },
+];
+
+async function run(apiKey, input) {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
@@ -47,23 +77,8 @@ async function run(apiKey, nmapInput) {
     },
   ];
 
-  const parts = [
-    {
-      text: `Given the NMAP OUTPUT below, summarize it in the following format.
-      The output must be valid markdown:
-      
-        summary: a non-technical summary in a couple of sentences
-        details: step-by-step comprehensive explanation that an expert can quickly scan and understand
-        graph: graphviz code that represents the host and the open ports with labels for each port
-      
-        NMAP OUTPUT:
-        ${nmapInput}
-        RESPONSE:`,
-    },
-  ];
-
   const result = await model.generateContent({
-    contents: [{ role: "user", parts }],
+    contents: [{ role: "user", parts: input }],
     generationConfig,
     safetySettings,
   });
@@ -78,6 +93,7 @@ export class NmapSummarizer extends LitElement {
       results: { type: String },
       geminiKey: { type: String },
       loading: { type: Boolean },
+      graphviz: { type: String },
     };
   }
 
@@ -86,6 +102,7 @@ export class NmapSummarizer extends LitElement {
     this.results = "Click Summarize to view results (may take a few moments)";
     this.geminiKey = localStorage.getItem("GEMINI_KEY");
     this.loading = false;
+    this.graphviz = "";
   }
 
   render() {
@@ -127,17 +144,25 @@ export class NmapSummarizer extends LitElement {
           <h1>Results</h1>
           <div>${resolveMarkdown(this.results)}</div>
         </section>
+        <section>
+          <graphviz-graph
+            graph="${stripCodeBlock(this.graphviz)}"
+          ></graphviz-graph>
+        </section>
       </section>`;
   }
   async #onClick() {
     const geminiKey = this.shadowRoot.querySelector(`sl-input`).value;
     localStorage.setItem("GEMINI_KEY", geminiKey);
     const nmapInput = this.shadowRoot.querySelector(`sl-textarea`).value;
-    console.log(geminiKey);
-    console.log("Clicked!");
-    console.log(nmapInput);
+    // console.log(geminiKey);
+    // console.log("Clicked!");
+    // console.log(nmapInput);
     this.loading = true;
-    this.results = await run(geminiKey, nmapInput);
+    run(geminiKey, markdownInput(nmapInput)).then((value) => {
+      this.results = value;
+    });
+    this.graphviz = await run(geminiKey, graphvizInput(nmapInput));
     this.loading = false;
   }
   static get styles() {
@@ -181,5 +206,4 @@ export class NmapSummarizer extends LitElement {
     `;
   }
 }
-
 window.customElements.define("nmap-summarizer", NmapSummarizer);
